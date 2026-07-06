@@ -52,11 +52,16 @@ form.addEventListener("submit", async (event) => {
 		"://" +
 		location.host +
 		"/wisp/";
+        
 	if ((await connection.getTransport()) !== "/libcurl/index.mjs") {
+		// Provide both websocket and explicit wisp mapping to initialize libcurl safely
 		await connection.setTransport("/libcurl/index.mjs", [
-			{ websocket: wispUrl },
+			{ websocket: wispUrl, wisp: wispUrl },
 		]);
+		// Give the worker an extra 200ms to spin up and load the WASM binary data
+		await new Promise(resolve => setTimeout(resolve, 200));
 	}
+    
 	const frame = scramjet.createFrame();
 	frame.frame.id = "sj-frame";
 	document.body.appendChild(frame.frame);
