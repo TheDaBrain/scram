@@ -19,6 +19,7 @@ class BrowserUI {
 		this.history = [];
 		this.historyIndex = -1;
 		this.isNavigating = false;
+		this.lastAddedUrl = null; // Track last URL added to history via polling
 
 		this.setupEventListeners();
 		this.startUrlUpdateInterval();
@@ -95,7 +96,7 @@ class BrowserUI {
 	}
 
 	/**
-	 * Update URL from frame navigation
+	 * Update URL from frame navigation (called by polling)
 	 */
 	updateUrlFromFrame(url) {
 		if (!url || url === "about:blank") return;
@@ -103,15 +104,15 @@ class BrowserUI {
 		// Update address bar
 		this.addressBar.value = url;
 
-		// Only add to history if it's different from current history entry
-		const currentHistoryUrl = this.history[this.historyIndex];
-		if (url !== currentHistoryUrl) {
+		// Only add to history if it's different from the last URL we added via polling
+		if (url !== this.lastAddedUrl) {
 			// Trim future history if we navigated forward before
 			if (this.historyIndex < this.history.length - 1) {
 				this.history = this.history.slice(0, this.historyIndex + 1);
 			}
 			// Add new URL to history
 			this.history.push(url);
+			this.lastAddedUrl = url;
 			this.historyIndex = this.history.length - 1;
 			// Update button states
 			this.updateButtonStates();
@@ -154,6 +155,7 @@ class BrowserUI {
 		}
 		this.history.push(url);
 		this.historyIndex = this.history.length - 1;
+		this.lastAddedUrl = url; // Mark as added so polling won't add it again
 
 		// Update address bar
 		this.addressBar.value = url;
@@ -189,9 +191,6 @@ class BrowserUI {
 
 			// Navigate
 			frame.go(url);
-
-			// Keep navigating flag true for 2 seconds to prevent polling from adding duplicates
-			await new Promise(resolve => setTimeout(resolve, 2000));
 		} catch (err) {
 			console.error("Failed to load frame:", err);
 			const error = document.getElementById("sj-error");
@@ -217,9 +216,12 @@ class BrowserUI {
 		if (this.historyIndex > 0) {
 			this.isNavigating = true;
 			this.historyIndex--;
-			this.addressBar.value = this.history[this.historyIndex];
-			this.loadFrame(this.history[this.historyIndex]);
+			const url = this.history[this.historyIndex];
+			this.addressBar.value = url;
+			this.lastAddedUrl = url; // Reset so polling won't re-add this URL
+			this.loadFrame(url);
 			this.updateButtonStates();
+			this.isNavigating = false;
 		}
 	}
 
@@ -230,9 +232,12 @@ class BrowserUI {
 		if (this.historyIndex < this.history.length - 1) {
 			this.isNavigating = true;
 			this.historyIndex++;
-			this.addressBar.value = this.history[this.historyIndex];
-			this.loadFrame(this.history[this.historyIndex]);
+			const url = this.history[this.historyIndex];
+			this.addressBar.value = url;
+			this.lastAddedUrl = url; // Reset so polling won't re-add this URL
+			this.loadFrame(url);
 			this.updateButtonStates();
+			this.isNavigating = false;
 		}
 	}
 
@@ -245,7 +250,7 @@ class BrowserUI {
 			this.currentFrame.go(this.history[this.historyIndex]);
 			setTimeout(() => {
 				this.isNavigating = false;
-			}, 2000);
+			}, 1000);
 		}
 	}
 
