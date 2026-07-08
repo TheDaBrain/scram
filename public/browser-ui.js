@@ -19,7 +19,6 @@ class BrowserUI {
 		this.history = [];
 		this.historyIndex = -1;
 		this.isNavigating = false;
-		this.lastRecordedUrl = null;
 
 		this.setupEventListeners();
 		this.startUrlUpdateInterval();
@@ -104,8 +103,9 @@ class BrowserUI {
 		// Update address bar
 		this.addressBar.value = url;
 
-		// Only add to history if it's different from the last recorded URL
-		if (url !== this.lastRecordedUrl) {
+		// Only add to history if it's different from current history entry
+		const currentHistoryUrl = this.history[this.historyIndex];
+		if (url !== currentHistoryUrl) {
 			// Trim future history if we navigated forward before
 			if (this.historyIndex < this.history.length - 1) {
 				this.history = this.history.slice(0, this.historyIndex + 1);
@@ -113,7 +113,6 @@ class BrowserUI {
 			// Add new URL to history
 			this.history.push(url);
 			this.historyIndex = this.history.length - 1;
-			this.lastRecordedUrl = url;
 			// Update button states
 			this.updateButtonStates();
 		}
@@ -155,7 +154,6 @@ class BrowserUI {
 		}
 		this.history.push(url);
 		this.historyIndex = this.history.length - 1;
-		this.lastRecordedUrl = url;
 
 		// Update address bar
 		this.addressBar.value = url;
@@ -191,6 +189,9 @@ class BrowserUI {
 
 			// Navigate
 			frame.go(url);
+
+			// Keep navigating flag true for 2 seconds to prevent polling from adding duplicates
+			await new Promise(resolve => setTimeout(resolve, 2000));
 		} catch (err) {
 			console.error("Failed to load frame:", err);
 			const error = document.getElementById("sj-error");
@@ -217,10 +218,8 @@ class BrowserUI {
 			this.isNavigating = true;
 			this.historyIndex--;
 			this.addressBar.value = this.history[this.historyIndex];
-			this.lastRecordedUrl = this.history[this.historyIndex];
 			this.loadFrame(this.history[this.historyIndex]);
 			this.updateButtonStates();
-			this.isNavigating = false;
 		}
 	}
 
@@ -232,10 +231,8 @@ class BrowserUI {
 			this.isNavigating = true;
 			this.historyIndex++;
 			this.addressBar.value = this.history[this.historyIndex];
-			this.lastRecordedUrl = this.history[this.historyIndex];
 			this.loadFrame(this.history[this.historyIndex]);
 			this.updateButtonStates();
-			this.isNavigating = false;
 		}
 	}
 
@@ -248,7 +245,7 @@ class BrowserUI {
 			this.currentFrame.go(this.history[this.historyIndex]);
 			setTimeout(() => {
 				this.isNavigating = false;
-			}, 1000);
+			}, 2000);
 		}
 	}
 
