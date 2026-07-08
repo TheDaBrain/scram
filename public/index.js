@@ -63,10 +63,7 @@ form.addEventListener("submit", async (event) => {
 		await new Promise(resolve => setTimeout(resolve, 200));
 	}
 
-	// Use browser UI to load the page
+	// FIX: Set the value and call navigate() so history tracks perfectly from the start
 	browserUI.addressBar.value = url;
-	await browserUI.loadFrame(url);
-	browserUI.history.push(url);
-	browserUI.historyIndex = 0;
-	browserUI.updateButtonStates();
+	await browserUI.navigate();
 });
