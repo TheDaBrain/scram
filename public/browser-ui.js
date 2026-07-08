@@ -19,6 +19,7 @@ class BrowserUI {
 		this.history = [];
 		this.historyIndex = -1;
 		this.isNavigating = false;
+		this.isTyping = false; // FIX: Prevent polling while typing
 		this.lastAddedUrl = null; // Track last URL added to history via polling
 
 		this.setupEventListeners();
@@ -27,13 +28,31 @@ class BrowserUI {
 
 	setupEventListeners() {
 		// Enter button click
-		this.btnEnter.addEventListener("click", () => this.navigate());
+		this.btnEnter.addEventListener("click", () => {
+			this.isTyping = false; // Stop typing state
+			this.navigate();
+		});
 
 		// Address bar Enter key
 		this.addressBar.addEventListener("keypress", (e) => {
 			if (e.key === "Enter") {
+				this.isTyping = false; // Stop typing state
 				this.navigate();
 			}
+		});
+
+		// FIX: Detect when user is typing or clicking the bar
+		this.addressBar.addEventListener("focus", () => {
+			this.isTyping = true;
+		});
+		this.addressBar.addEventListener("input", () => {
+			this.isTyping = true;
+		});
+		this.addressBar.addEventListener("blur", () => {
+			// Small timeout lets button click registers before interval resumes
+			setTimeout(() => {
+				this.isTyping = false;
+			}, 200);
 		});
 
 		// Navigation buttons
@@ -43,7 +62,7 @@ class BrowserUI {
 
 		// Update address bar when frame navigates
 		this.frameContainer.addEventListener("message", (e) => {
-			if (e.data && e.data.url) {
+			if (e.data && e.data.url && !this.isTyping) { // FIX: Don't overwrite typing via messages
 				this.addressBar.value = e.data.url;
 			}
 		}, false);
@@ -55,7 +74,8 @@ class BrowserUI {
 	 */
 	startUrlUpdateInterval() {
 		setInterval(() => {
-			if (this.currentFrame && !this.isNavigating) {
+			// FIX: Do not poll if the user is currently typing a new URL
+			if (this.currentFrame && !this.isNavigating && !this.isTyping) {
 				try {
 					// Try to get the current URL from the frame
 					const frameUrl = this.getCurrentFrameUrl();
@@ -99,7 +119,7 @@ class BrowserUI {
 	 * Update URL from frame navigation (called by polling)
 	 */
 	updateUrlFromFrame(url) {
-		if (!url || url === "about:blank" || this.isNavigating) return;
+		if (!url || url === "about:blank" || this.isNavigating || this.isTyping) return;
 
 		// Update address bar
 		this.addressBar.value = url;
@@ -220,8 +240,6 @@ class BrowserUI {
 			this.addressBar.value = url;
 			this.lastAddedUrl = url; // Reset so polling won't re-add this URL
 			
-			// FIX: We must await this async action so the frame completely loads 
-			// before we turn off this.isNavigating flag
 			await this.loadFrame(url);
 			
 			this.updateButtonStates();
@@ -240,7 +258,6 @@ class BrowserUI {
 			this.addressBar.value = url;
 			this.lastAddedUrl = url; // Reset so polling won't re-add this URL
 			
-			// FIX: Await the async frame creation loop
 			await this.loadFrame(url);
 			
 			this.updateButtonStates();
