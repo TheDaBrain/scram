@@ -1,4 +1,26 @@
-		<body>
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1.0, shrink-to-fit=no"
+		/>
+		<title>BrainLink</title>
+
+		<link rel="shortcut icon" content="favicon.webp" />
+	
+		<script src="/scram/scramjet.all.js"></script>
+		<script src="/baremux/index.js"></script>
+		
+		<link rel="stylesheet" href="index.css" />
+		<script src="register-sw.js" defer></script>
+		<script src="search.js" defer></script>
+		<script src="browser-ui.js" defer></script>
+		<script src="index.js" defer></script>
+	</head>
+
+	<body>
 		<!-- Browser UI Container -->
 		<div id="browser-container" class="browser-hidden">
 			<div class="browser-header">
@@ -51,9 +73,9 @@
 						<h1 class="title">BrainLink</h1>
 						<p class="subtitle">Powered by Brainjet</p>
 					</div>
-					<!-- Kept original description class for identical UI styling -->
 					<p class="description">
-						IP: <span id="hud-ip">Loading...</span> | <span id="hud-fps">0</span> FPS
+						Coded and developed by Enickel8,
+						this is a browser that allows seamless browsing.
 					</p>
 				</div>
 
@@ -62,7 +84,7 @@
 					<form id="sj-form" class="search-form">
 						<input
 							id="sj-search-engine"
-							value="https://duckduckgo.com"
+							value="https://duckduckgo.com/?q=%s"
 							type="hidden"
 						/>
 						<div class="search-container">
@@ -87,56 +109,15 @@
 
 			<!-- Footer -->
 			<footer class="landing-footer">
-				<!-- Replaced links with status counters keeping identical footer structure -->
 				<div class="footer-links">
-					<span>IP: <span id="footer-ip">Loading...</span></span>
+					<a href="https://github.com/TheDabrain" title="TheDaBrain">TheDaBrain</a>
 					<span class="divider">•</span>
-					<span><span id="footer-fps">0</span> FPS</span>
+					<a href="scratch.mit.edu/users/Enickel8" title="Scratch">Scratch</a>
+					<span class="divider">•</span>
+					<a href="credits.html" title="Credits">Credits</a>
 				</div>
 				<span class="copyright">brainlink &copy; DB 2025</span>
 			</footer>
 		</div>
-
-		<!-- Script to update both locations -->
-		<script>
-			// 1. Fetch IP
-			fetch('https://ipify.org')
-				.then(response => response.json())
-				.then(data => {
-					document.getElementById('hud-ip').textContent = data.ip;
-					document.getElementById('footer-ip').textContent = data.ip;
-				})
-				.catch(err => {
-					document.getElementById('hud-ip').textContent = 'Unavailable';
-					document.getElementById('footer-ip').textContent = 'Unavailable';
-				});
-
-			// 2. Track FPS
-			let lastCalledTime;
-			let fpsCounter = 0;
-			const hudFps = document.getElementById('hud-fps');
-			const footerFps = document.getElementById('footer-fps');
-
-			function updateFPS() {
-				if (!lastCalledTime) {
-					lastCalledTime = performance.now();
-					fpsCounter = 0;
-					requestAnimationFrame(updateFPS);
-					return;
-				}
-				
-				fpsCounter++;
-				const delta = (performance.now() - lastCalledTime) / 1000;
-
-				if (delta >= 1) {
-					const currentFps = Math.round(fpsCounter / delta);
-					hudFps.textContent = currentFps;
-					footerFps.textContent = currentFps;
-					fpsCounter = 0;
-					lastCalledTime = performance.now();
-				}
-				requestAnimationFrame(updateFPS);
-			}
-			requestAnimationFrame(updateFPS);
-		</script>
 	</body>
+</html>
