@@ -99,7 +99,7 @@ class BrowserUI {
 	 * Update URL from frame navigation (called by polling)
 	 */
 	updateUrlFromFrame(url) {
-		if (!url || url === "about:blank") return;
+		if (!url || url === "about:blank" || this.isNavigating) return;
 
 		// Update address bar
 		this.addressBar.value = url;
@@ -194,7 +194,7 @@ class BrowserUI {
 		} catch (err) {
 			console.error("Failed to load frame:", err);
 			const error = document.getElementById("sj-error");
-			error.textContent = "Failed to load page.";
+			if (error) error.textContent = "Failed to load page.";
 		}
 	}
 
@@ -212,14 +212,18 @@ class BrowserUI {
 	/**
 	 * Navigate back in history
 	 */
-	goBack() {
-		if (this.historyIndex > 0) {
+	async goBack() {
+		if (this.historyIndex > 0 && !this.isNavigating) {
 			this.isNavigating = true;
 			this.historyIndex--;
 			const url = this.history[this.historyIndex];
 			this.addressBar.value = url;
 			this.lastAddedUrl = url; // Reset so polling won't re-add this URL
-			this.loadFrame(url);
+			
+			// FIX: We must await this async action so the frame completely loads 
+			// before we turn off this.isNavigating flag
+			await this.loadFrame(url);
+			
 			this.updateButtonStates();
 			this.isNavigating = false;
 		}
@@ -228,14 +232,17 @@ class BrowserUI {
 	/**
 	 * Navigate forward in history
 	 */
-	goForward() {
-		if (this.historyIndex < this.history.length - 1) {
+	async goForward() {
+		if (this.historyIndex < this.history.length - 1 && !this.isNavigating) {
 			this.isNavigating = true;
 			this.historyIndex++;
 			const url = this.history[this.historyIndex];
 			this.addressBar.value = url;
 			this.lastAddedUrl = url; // Reset so polling won't re-add this URL
-			this.loadFrame(url);
+			
+			// FIX: Await the async frame creation loop
+			await this.loadFrame(url);
+			
 			this.updateButtonStates();
 			this.isNavigating = false;
 		}
@@ -245,7 +252,7 @@ class BrowserUI {
 	 * Refresh current page
 	 */
 	refresh() {
-		if (this.currentFrame) {
+		if (this.currentFrame && !this.isNavigating) {
 			this.isNavigating = true;
 			this.currentFrame.go(this.history[this.historyIndex]);
 			setTimeout(() => {
