@@ -34,6 +34,7 @@ scramjet.init();
 
 const connection = new BareMux.BareMuxConnection("/baremux/worker.js");
 
+// Landing page form submission
 form.addEventListener("submit", async (event) => {
 	event.preventDefault();
 
@@ -61,9 +62,11 @@ form.addEventListener("submit", async (event) => {
 		// Give the worker an extra 200ms to spin up and load the WASM binary data
 		await new Promise(resolve => setTimeout(resolve, 200));
 	}
-    
-	const frame = scramjet.createFrame();
-	frame.frame.id = "sj-frame";
-	document.body.appendChild(frame.frame);
-	frame.go(url);
+
+	// Use browser UI to load the page
+	browserUI.addressBar.value = url;
+	await browserUI.loadFrame(url);
+	browserUI.history.push(url);
+	browserUI.historyIndex = 0;
+	browserUI.updateButtonStates();
 });

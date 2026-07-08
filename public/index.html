@@ -16,52 +16,95 @@
 		<link rel="stylesheet" href="index.css" />
 		<script src="register-sw.js" defer></script>
 		<script src="search.js" defer></script>
+		<script src="browser-ui.js" defer></script>
 		<script src="index.js" defer></script>
 	</head>
 
 	<body>
-		<div title="Scramjet Logo" class="flex-center logo-wrapper header-center">
-			<img class="logo" src="sj.png" alt="Scramjet" />
-			<h1>Scramjet | MW</h1>
-		</div>
-		<div class="flex-center desc left-margin">
-			<p>
-				BrainLink is an web proxy designed to bypass and
-				evade internet censorship, bypass arbitrary web browser restrictions and
-				innovate web proxy technologies. This was coded
-				by Enickel8
-			</p>
+		<!-- Browser UI Container -->
+		<div id="browser-container" class="browser-hidden">
+			<div class="browser-header">
+				<div class="browser-controls">
+					<button id="btn-back" class="browser-btn" title="Back">
+						<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+							<path d="M15 18l-6-6 6-6"/>
+						</svg>
+					</button>
+					<button id="btn-forward" class="browser-btn" title="Forward">
+						<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+							<path d="M9 18l6-6-6-6"/>
+						</svg>
+					</button>
+					<button id="btn-refresh" class="browser-btn" title="Refresh">
+						<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+							<polyline points="23 4 23 10 17 10"></polyline>
+							<path d="M20.49 15a9 9 0 1 1-2-8.12"></path>
+						</svg>
+					</button>
+				</div>
+				<input 
+					id="address-bar" 
+					type="text" 
+					class="address-bar" 
+					placeholder="Enter URL or search term..."
+					spellcheck="false"
+				/>
+				<button id="btn-enter" class="btn-enter" title="Navigate">
+					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+						<polyline points="6 9 12 15 18 9"></polyline>
+					</svg>
+				</button>
+			</div>
+			<div id="sj-frame-container" class="frame-container">
+				<!-- Frame will be inserted here -->
+			</div>
 		</div>
 
-		<form id="sj-form" class="flex-center">
-			<input
-				id="sj-search-engine"
-				value="https://www.google.com/search?q=%s"
-				type="hidden"
-			/>
-			<input id="sj-address" type="text" placeholder="Search the web freely" />
-		</form>
-		<div class="desc left-margin">
-			<p id="sj-error"></p>
-			<pre id="sj-error-code"></pre>
+		<!-- Landing Page -->
+		<div id="landing-page" class="landing-page">
+			<div title="Scramjet Logo" class="flex-center logo-wrapper header-center">
+				<img class="logo" src="sj.png" alt="Scramjet" />
+				<h1>Scramjet | MW</h1>
+			</div>
+			<div class="flex-center desc left-margin">
+				<p>
+					BrainLink is a web proxy designed to bypass and
+					evade internet censorship, bypass arbitrary web browser restrictions and
+					innovate web proxy technologies. This was coded
+					by Enickel8
+				</p>
+			</div>
+
+			<form id="sj-form" class="flex-center">
+				<input
+					id="sj-search-engine"
+					value="https://www.google.com/search?q=%s"
+					type="hidden"
+				/>
+				<input id="sj-address" type="text" placeholder="Search the web freely" />
+			</form>
+			<div class="desc left-margin">
+				<p id="sj-error"></p>
+				<pre id="sj-error-code"></pre>
+			</div>
+			<footer>
+				<div>
+					<a
+						title="The Mercury Workshop GitHub organization"
+						href="https://github.com/MercuryWorkshop"
+						>Mercury Workshop</a
+					>
+					<a
+						title="The example demo app for Scramjet"
+						href="https://github.com/MercuryWorkshop/Scramjet-Demo"
+						>GitHub</a
+					>
+					<a title="License information" href="credits.html">Credits</a>
+				</div>
+				<div>
+					<span>Scramjet &copy; MW 2025</span>
+				</div>
+			</footer>
 		</div>
-		<footer>
-			<div>
-				<a
-					title="The Mercury Workshop GitHub organization"
-					href="https://github.com/MercuryWorkshop"
-					>Mercury Workshop</a
-				>
-				<a
-					title="The example demo app for Scramjet"
-					href="https://github.com/MercuryWorkshop/Scramjet-Demo"
-					>GitHub</a
-				>
-				<a title="License information" href="credits.html">Credits</a>
-			</div>
-			<div>
-				<span>Scramjet &copy; MW 2025</span>
-			</div>
-		</footer>
 	</body>
 </html>
