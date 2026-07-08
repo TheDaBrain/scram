@@ -18,8 +18,10 @@ class BrowserUI {
 		this.currentFrame = null;
 		this.history = [];
 		this.historyIndex = -1;
+		this.isNavigating = false;
 
 		this.setupEventListeners();
+		this.startUrlUpdateInterval();
 	}
 
 	setupEventListeners() {
@@ -44,6 +46,76 @@ class BrowserUI {
 				this.addressBar.value = e.data.url;
 			}
 		}, false);
+	}
+
+	/**
+	 * Start polling for URL changes in the frame
+	 * This detects when user clicks links inside Scramjet
+	 */
+	startUrlUpdateInterval() {
+		setInterval(() => {
+			if (this.currentFrame && !this.isNavigating) {
+				try {
+					// Try to get the current URL from the frame
+					const frameUrl = this.getCurrentFrameUrl();
+					if (frameUrl && frameUrl !== this.addressBar.value) {
+						this.updateUrlFromFrame(frameUrl);
+					}
+				} catch (err) {
+					// Silently fail - cross-origin issues are expected
+				}
+			}
+		}, 500);
+	}
+
+	/**
+	 * Try to get current URL from the Scramjet frame
+	 */
+	getCurrentFrameUrl() {
+		if (!this.currentFrame) return null;
+
+		try {
+			// Scramjet exposes the current URL through its API
+			if (this.currentFrame.url) {
+				return this.currentFrame.url;
+			}
+			
+			// Try to access through window property if available
+			if (this.currentFrame.frame && this.currentFrame.frame.contentWindow) {
+				const frameWindow = this.currentFrame.frame.contentWindow;
+				if (frameWindow.location && frameWindow.location.href) {
+					return frameWindow.location.href;
+				}
+			}
+		} catch (err) {
+			// Cross-origin or other error
+		}
+		
+		return null;
+	}
+
+	/**
+	 * Update URL from frame navigation
+	 */
+	updateUrlFromFrame(url) {
+		if (!url || url === "about:blank") return;
+
+		// Update address bar
+		this.addressBar.value = url;
+
+		// Only add to history if it's different from current
+		const currentHistoryUrl = this.history[this.historyIndex];
+		if (url !== currentHistoryUrl) {
+			// Trim future history if we navigated forward before
+			if (this.historyIndex < this.history.length - 1) {
+				this.history = this.history.slice(0, this.historyIndex + 1);
+			}
+			// Add new URL to history
+			this.history.push(url);
+			this.historyIndex = this.history.length - 1;
+			// Update button states
+			this.updateButtonStates();
+		}
 	}
 
 	/**
@@ -74,6 +146,8 @@ class BrowserUI {
 		const searchEngine = document.getElementById("sj-search-engine").value;
 		const url = search(input, searchEngine);
 
+		this.isNavigating = true;
+
 		// Add to history
 		if (this.historyIndex < this.history.length - 1) {
 			this.history = this.history.slice(0, this.historyIndex + 1);
@@ -89,6 +163,8 @@ class BrowserUI {
 
 		// Update button states
 		this.updateButtonStates();
+
+		this.isNavigating = false;
 	}
 
 	/**
@@ -136,10 +212,12 @@ class BrowserUI {
 	 */
 	goBack() {
 		if (this.historyIndex > 0) {
+			this.isNavigating = true;
 			this.historyIndex--;
 			this.addressBar.value = this.history[this.historyIndex];
 			this.loadFrame(this.history[this.historyIndex]);
 			this.updateButtonStates();
+			this.isNavigating = false;
 		}
 	}
 
@@ -148,10 +226,12 @@ class BrowserUI {
 	 */
 	goForward() {
 		if (this.historyIndex < this.history.length - 1) {
+			this.isNavigating = true;
 			this.historyIndex++;
 			this.addressBar.value = this.history[this.historyIndex];
 			this.loadFrame(this.history[this.historyIndex]);
 			this.updateButtonStates();
+			this.isNavigating = false;
 		}
 	}
 
@@ -160,7 +240,11 @@ class BrowserUI {
 	 */
 	refresh() {
 		if (this.currentFrame) {
+			this.isNavigating = true;
 			this.currentFrame.go(this.history[this.historyIndex]);
+			setTimeout(() => {
+				this.isNavigating = false;
+			}, 1000);
 		}
 	}
 
