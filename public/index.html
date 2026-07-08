@@ -62,48 +62,60 @@
 
 		<!-- Landing Page -->
 		<div id="landing-page" class="landing-page">
-			<div title="Scramjet Logo" class="flex-center logo-wrapper header-center">
-				<img class="logo" src="sj.png" alt="Scramjet" />
-				<h1>Scramjet | MW</h1>
-			</div>
-			<div class="flex-center desc left-margin">
-				<p>
-					BrainLink is a web proxy designed to bypass and
-					evade internet censorship, bypass arbitrary web browser restrictions and
-					innovate web proxy technologies. This was coded
-					by Enickel8
-				</p>
+			<!-- Background gradient animation -->
+			<div class="gradient-bg"></div>
+			
+			<div class="landing-content">
+				<!-- Left side: Logo and description -->
+				<div class="landing-left">
+					<div class="logo-container">
+						<img class="logo" src="sj.png" alt="Scramjet" />
+						<h1 class="title">BrainLink</h1>
+						<p class="subtitle">Powered by Scramjet</p>
+					</div>
+					<p class="description">
+						Bypass censorship and browse freely. Experience the web without restrictions.
+					</p>
+				</div>
+
+				<!-- Right side: Search form and enter button -->
+				<div class="landing-right">
+					<form id="sj-form" class="search-form">
+						<input
+							id="sj-search-engine"
+							value="https://www.google.com/search?q=%s"
+							type="hidden"
+						/>
+						<div class="search-container">
+							<input 
+								id="sj-address" 
+								type="text" 
+								class="search-input" 
+								placeholder="Search the web freely..."
+								spellcheck="false"
+							/>
+							<button type="submit" class="search-enter-btn" title="Search">
+								<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+									<polyline points="6 9 12 15 18 9"></polyline>
+								</svg>
+							</button>
+						</div>
+					</form>
+					<div id="sj-error" class="error-message"></div>
+					<pre id="sj-error-code" class="error-code"></pre>
+				</div>
 			</div>
 
-			<form id="sj-form" class="flex-center">
-				<input
-					id="sj-search-engine"
-					value="https://www.google.com/search?q=%s"
-					type="hidden"
-				/>
-				<input id="sj-address" type="text" placeholder="Search the web freely" />
-			</form>
-			<div class="desc left-margin">
-				<p id="sj-error"></p>
-				<pre id="sj-error-code"></pre>
-			</div>
-			<footer>
-				<div>
-					<a
-						title="The Mercury Workshop GitHub organization"
-						href="https://github.com/MercuryWorkshop"
-						>Mercury Workshop</a
-					>
-					<a
-						title="The example demo app for Scramjet"
-						href="https://github.com/MercuryWorkshop/Scramjet-Demo"
-						>GitHub</a
-					>
-					<a title="License information" href="credits.html">Credits</a>
+			<!-- Footer -->
+			<footer class="landing-footer">
+				<div class="footer-links">
+					<a href="https://github.com/MercuryWorkshop" title="Mercury Workshop">Mercury Workshop</a>
+					<span class="divider">•</span>
+					<a href="https://github.com/MercuryWorkshop/Scramjet-Demo" title="GitHub">GitHub</a>
+					<span class="divider">•</span>
+					<a href="credits.html" title="Credits">Credits</a>
 				</div>
-				<div>
-					<span>Scramjet &copy; MW 2025</span>
-				</div>
+				<span class="copyright">Scramjet &copy; MW 2025</span>
 			</footer>
 		</div>
 	</body>
