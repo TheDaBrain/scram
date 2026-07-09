@@ -14,6 +14,105 @@
 		<script src="/baremux/index.js"></script>
 		
 		<link rel="stylesheet" href="index.css" />
+		
+		<!-- Login Popup Styles -->
+		<style>
+			#login-overlay {
+				position: fixed;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				background: rgba(0, 0, 0, 0.6);
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				z-index: 2000;
+			}
+
+			#login-overlay.hidden {
+				display: none;
+			}
+
+			.login-popup-box {
+				background: white;
+				padding: 40px;
+				border-radius: 12px;
+				width: 320px;
+				text-align: center;
+				box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+				animation: slideDown 0.3s ease-out;
+			}
+
+			@keyframes slideDown {
+				from {
+					opacity: 0;
+					transform: translateY(-20px);
+				}
+				to {
+					opacity: 1;
+					transform: translateY(0);
+				}
+			}
+
+			.login-popup-box h2 {
+				margin-top: 0;
+				color: #333;
+				font-size: 24px;
+				margin-bottom: 20px;
+			}
+
+			.login-popup-box input {
+				width: 100%;
+				padding: 12px;
+				margin: 10px 0;
+				box-sizing: border-box;
+				border: 1px solid #ddd;
+				border-radius: 6px;
+				font-size: 14px;
+				transition: border-color 0.3s;
+			}
+
+			.login-popup-box input:focus {
+				outline: none;
+				border-color: #007bff;
+				box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+			}
+
+			.login-popup-box button {
+				width: 100%;
+				padding: 12px;
+				background-color: #007bff;
+				color: white;
+				border: none;
+				border-radius: 6px;
+				cursor: pointer;
+				font-size: 16px;
+				font-weight: 600;
+				margin-top: 15px;
+				transition: background-color 0.3s;
+			}
+
+			.login-popup-box button:hover {
+				background-color: #0056b3;
+			}
+
+			.login-popup-box button:active {
+				transform: scale(0.98);
+			}
+
+			#login-error-msg {
+				color: #dc3545;
+				font-size: 13px;
+				margin-top: 12px;
+				display: none;
+			}
+
+			#login-error-msg.show {
+				display: block;
+			}
+		</style>
+
 		<script src="register-sw.js" defer></script>
 		<script src="search.js" defer></script>
 		<script src="browser-ui.js" defer></script>
@@ -21,6 +120,17 @@
 	</head>
 
 	<body>
+		<!-- Login Overlay Popup -->
+		<div id="login-overlay">
+			<div class="login-popup-box">
+				<h2>BrainLink Login</h2>
+				<input type="text" id="login-username" placeholder="Username" required>
+				<input type="password" id="login-password" placeholder="Password" required>
+				<button onclick="loginCheck()">Login</button>
+				<div id="login-error-msg"></div>
+			</div>
+		</div>
+
 		<!-- Browser UI Container -->
 		<div id="browser-container" class="browser-hidden">
 			<div class="browser-header">
@@ -107,5 +217,50 @@
 				</div>
 			</div>
 		</div>
+
+		<!-- Login Script -->
+		<script>
+			// Credentials
+			const VALID_USER = "Enickel8";
+			const VALID_PASS = "USA250";
+
+			// Check if user is already logged in
+			window.addEventListener("load", function() {
+				if (localStorage.getItem("brainlinkLoggedIn") !== "true") {
+					document.getElementById("login-overlay").classList.remove("hidden");
+				} else {
+					document.getElementById("login-overlay").classList.add("hidden");
+				}
+			});
+
+			// Login function
+			function loginCheck() {
+				const username = document.getElementById("login-username").value;
+				const password = document.getElementById("login-password").value;
+				const errorMsg = document.getElementById("login-error-msg");
+
+				if (username === VALID_USER && password === VALID_PASS) {
+					localStorage.setItem("brainlinkLoggedIn", "true");
+					document.getElementById("login-overlay").classList.add("hidden");
+				} else {
+					errorMsg.textContent = "Invalid username or password.";
+					errorMsg.classList.add("show");
+					document.getElementById("login-password").value = "";
+				}
+			}
+
+			// Allow Enter key to submit
+			document.getElementById("login-password").addEventListener("keypress", function(e) {
+				if (e.key === "Enter") {
+					loginCheck();
+				}
+			});
+
+			document.getElementById("login-username").addEventListener("keypress", function(e) {
+				if (e.key === "Enter") {
+					loginCheck();
+				}
+			});
+		</script>
 	</body>
 </html>
